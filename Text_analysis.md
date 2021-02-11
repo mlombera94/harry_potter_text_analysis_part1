@@ -32,50 +32,12 @@ devtools::install_github("bradleyboehmke/harrypotter", force = TRUE) # provides 
 # tidyr (data tidying)
 # stringr (for strings)
 library(tidyverse)   
-```
 
-    ## ── Attaching packages ────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
-
-    ## ✔ ggplot2 3.1.0     ✔ purrr   0.2.5
-    ## ✔ tibble  2.1.3     ✔ dplyr   0.8.3
-    ## ✔ tidyr   0.8.2     ✔ stringr 1.3.1
-    ## ✔ readr   1.2.1     ✔ forcats 0.3.0
-
-    ## Warning: package 'tibble' was built under R version 3.5.2
-
-    ## Warning: package 'dplyr' was built under R version 3.5.2
-
-    ## ── Conflicts ───────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-
-``` r
 library(harrypotter) # loads harry potter novels 
 library(tidytext) # provides additional text mining functions
-```
-
-    ## Warning: package 'tidytext' was built under R version 3.5.2
-
-``` r
 library(ggwordcloud) # provides a word cloud text geom for ggplot2
-```
-
-    ## Warning: package 'ggwordcloud' was built under R version 3.5.2
-
-``` r
 library(scales) # provides added functions for data visualization
 ```
-
-    ## 
-    ## Attaching package: 'scales'
-
-    ## The following object is masked from 'package:purrr':
-    ## 
-    ##     discard
-
-    ## The following object is masked from 'package:readr':
-    ## 
-    ##     col_factor
 
 Step 2: Tidying the text data.
 ------------------------------

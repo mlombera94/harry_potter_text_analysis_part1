@@ -25,7 +25,7 @@ devtools::install_github("bradleyboehmke/harrypotter", force = TRUE) # provides 
 
 ### Load the other necessary packages for this project
 
-```{r, results='hide'}
+```{r, results='hide', message=FALSE, warning=FALSE}
 # The following package tidyverse will load core packages including:
 # ggplot2 (data visualization)
 # dplyr (data manipulation)
