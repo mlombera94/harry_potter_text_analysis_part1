@@ -3,8 +3,8 @@ title: "Harry Potter Text Analysis Part 1"
 author: "Maurisio Lombera"
 date: "February 01, 2021"
 output: 
-  html_notebook: default
   pdf_document: default
+  html_notebook: default
 ---
 
 You don't need to be a wizard to start learning text analysis.
