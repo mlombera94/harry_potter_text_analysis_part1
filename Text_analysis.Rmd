@@ -1,0 +1,183 @@
+---
+title: "Harry Potter Text Analysis Part 1"
+author: "Maurisio Lombera"
+date: "February 01, 2021"
+output: 
+  html_notebook: default
+  pdf_document: default
+---
+
+You don't need to be a wizard to start learning text analysis.
+
+## Introduction:
+In this week's post, we will be focusing on mining text data for analysis. This example uses J.K Rowling's widely known Harry Potter series and R software to mine the text. This post will demonstrate step by step how to get started   
+
+## Step 1: Download the Harry Potter series.
+
+```{r, results='hide'}
+if (packageVersion("devtools") < 1.6) {
+  install.packages("devtools")
+ }
+
+devtools::install_github("bradleyboehmke/harrypotter", force = TRUE) # provides the first seven novels of the Harry Potter series
+```
+
+### Load the other necessary packages for this project
+
+```{r, results='hide'}
+# The following package tidyverse will load core packages including:
+# ggplot2 (data visualization)
+# dplyr (data manipulation)
+# tidyr (data tidying)
+# stringr (for strings)
+library(tidyverse)   
+
+library(harrypotter) # loads harry potter novels 
+library(tidytext) # provides additional text mining functions
+library(ggwordcloud) # provides a word cloud text geom for ggplot2
+library(scales) # provides added functions for data visualization
+```
+
+## Step 2: Tidying the text data.
+
+Once all the necessary packages have been loaded, we can start preparing the text data for analysis. Textual data is often unstructured and is not suitable for even the simplest of analysis. Textual data should be formatted into a special type of data frame known as a tibble. For this example, each tibble will consist of a single chapter within each book.
+
+### Extract and format into a tidy text tibble
+
+```{r}
+# store the title of each novel within a variable
+titles <- c("Philosopher's Stone",
+            "Chamber of Secrets",
+            "Prisoner of Azkaban",
+            "Goblet of Fire",
+            "Order of the Phoenix",
+            "Half-Blood Prince",
+            "Deathly Hallows")
+
+# all novels will be stored in a large tibble consisting of smaller tibbles for each novel, therefore, format as a list object to store a tibble for each novel
+books <- list(philosophers_stone,
+                chamber_of_secrets,
+                prisoner_of_azkaban,
+                goblet_of_fire,
+                order_of_the_phoenix,
+                half_blood_prince,
+                deathly_hallows)
+
+
+series <- tibble() # create an empty tibble to store the text data
+
+# for loop to unnest and create a tidy text tibble for each novel
+for(i in seq_along(titles)) {
+
+  clean <- tibble(chapter = seq_along(books[[i]]),
+                  text = books[[i]]) %>% # creates a tibble containing each chapter for each novel
+                  unnest_tokens(word, text) %>% # unnests each word to create a 2 column table, with each row containing a single token (word/character) and the chapter it pertains to
+                  mutate(book = titles[i]) %>% # adds a third column to identify which novel each token pertains to
+                  select(book, everything()) # reorders the columns within the tibble with book as the first column
+
+  series <- rbind(series, clean) # binds the tibble of each novel by rows  
+}
+
+# set factor to keep books in order of publication
+series$book <- factor(series$book, levels = titles)
+```
+
+## Step 3: Text Analysis
+
+### Simple Analysis
+Let's begin with simple analysis and count the total number of words in each novel.
+
+```{r}
+series %>%
+  group_by(book) %>%
+  summarize(total_words = n())
+```
+
+Out of all seven novels, **Order of the Pheonix** is the longest novels with a total of 258,763 words, while **Philosopher's Stone** is the shortest with only 77,875 words.
+
+Next, we'll list the top ten most commonly used words within all seven novels
+```{r, message=FALSE, warning=FALSE}
+series %>%
+  count(word, sort = TRUE) %>% 
+  top_n(10)
+```
+
+To no surprise, the most common words include "the", "and", "to" "of" and "a". These are referred to as **stop words**. This information isn't very useful as within any novel, we would expect similar results. Luckily, there is a function that removes stop words from the tibble.
+
+```{r, message=FALSE, warning=FALSE}
+series %>%
+  anti_join(stop_words) %>% # removes all stop words from all novels within series
+  count(word, sort = TRUE) %>%
+  top_n(10)
+```
+
+The results are much better as now we get a better understanding of the novels. For someone who hasn't read the novel, they could easily deduce who the main characters are.
+
+We can also extract the top three words by novel using dplyr's useful data manipulation functions
+
+```{r, message=FALSE, warning=FALSE}
+series %>%
+  anti_join(stop_words) %>% # removes all stop words
+  group_by(book) %>%
+  count(word, sort = TRUE) %>%
+  top_n(3) %>%
+  rename(total_count = n) %>% # renames column to total_count
+  arrange(book) # order by chronological order of publication
+```
+
+Aside from the **Philosopher's Stone** and **Half-Blood Prince**, the top three words in each novel are *Harry*, *Hermione*, and *Ron*
+
+### Data Visualization
+We can visualize the above analysis. Let's start by plotting the total number of words for each novel.
+
+```{r}
+series %>%
+  group_by(book) %>%
+  summarize(total_words = n()) %>%
+  ungroup() %>%
+  ggplot(aes(book, total_words, fill = book)) +
+    geom_bar(stat = "identity") +
+    coord_flip() +
+    scale_y_continuous(name="Total Number of Words",
+                       labels = comma,
+                       breaks = c(0, 50000, 100000, 150000, 200000, 250000, 300000)) +
+    scale_x_discrete(name = "Novels") +
+    theme(legend.position = "none")
+```
+
+Next, we'll plot the top 10 words used in each novel.
+```{r, message=FALSE, warning=FALSE}
+series %>%
+  anti_join(stop_words) %>% # remove stop words
+  group_by(book) %>%
+  count(word, sort = TRUE) %>%
+  top_n(10) %>%
+  ungroup() %>%
+  ggplot(aes(word, n, fill = book)) + # use data from each novel for plot
+    geom_bar(stat = "identity") +
+    facet_wrap(~ book, scales = "free_y") + # separates plots by novel, "free_y" shares scales across the y-axis
+    labs(x = "", y = "Frequency") + # set x and y-axis labels
+    coord_flip() +
+    theme(legend.position="none") # Flip cartesian coordinates so horizontal becomes vertical vice versa.
+```
+
+Finally, generating word clouds is another useful way to visualize the frequency of words by novel.
+```{r, message=FALSE, warning=FALSE}
+set.seed(123) # for replication purposes
+series %>%
+  anti_join(stop_words) %>% # remove stop words
+  group_by(book) %>%
+  count(word, sort = TRUE) %>%
+  top_n(15) %>%
+  mutate(angle = 90 * sample(c(0, 1), n(), replace = TRUE, prob = c(60, 40))) %>%
+  ggplot(aes(label = word,
+          size = n,
+          color = book,
+          angle = angle
+    )) +
+    geom_text_wordcloud_area(area_corr = TRUE,
+        eccentricity = 2) +
+    scale_size_area(max_size = 7.5) +
+    theme_minimal() +
+    facet_wrap(~book)
+```
