@@ -84,6 +84,26 @@ for(i in seq_along(titles)) {
 series$book <- factor(series$book, levels = titles)
 ```
 
+Here is an example of how the tibble is structured once it is in a tidy format.
+
+``` r
+series %>% head(10)
+```
+
+    ## # A tibble: 10 x 3
+    ##    book                chapter word   
+    ##    <fct>                 <int> <chr>  
+    ##  1 Philosopher's Stone       1 the    
+    ##  2 Philosopher's Stone       1 boy    
+    ##  3 Philosopher's Stone       1 who    
+    ##  4 Philosopher's Stone       1 lived  
+    ##  5 Philosopher's Stone       1 mr     
+    ##  6 Philosopher's Stone       1 and    
+    ##  7 Philosopher's Stone       1 mrs    
+    ##  8 Philosopher's Stone       1 dursley
+    ##  9 Philosopher's Stone       1 of     
+    ## 10 Philosopher's Stone       1 number
+
 Step 3: Text Analysis
 ---------------------
 
@@ -206,7 +226,7 @@ series %>%
     theme(legend.position = "none")
 ```
 
-![](Text_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](Text_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 Next, we'll plot the top 10 words used in each novel.
 
@@ -225,7 +245,7 @@ series %>%
     theme(legend.position="none") # Flip cartesian coordinates so horizontal becomes vertical vice versa.
 ```
 
-![](Text_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](Text_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 Finally, generating word clouds is another useful way to visualize the frequency of words by novel.
 
@@ -249,4 +269,4 @@ series %>%
     facet_wrap(~book)
 ```
 
-![](Text_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](Text_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
