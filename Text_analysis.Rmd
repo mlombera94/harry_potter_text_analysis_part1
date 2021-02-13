@@ -41,9 +41,9 @@ library(scales) # provides added functions for data visualization
 
 ## Step 2: Tidying the text data.
 
-Once all the necessary packages have been loaded, we can start preparing the text data for analysis. Textual data is often unstructured and is not suitable for even the simplest of analysis. Textual data should be formatted into a special type of data frame known as a tibble. For this example, each tibble will consist of a single chapter within each book.
+Once all the necessary packages have been loaded, we can start preparing the text data for analysis. Textual data is often unstructured and is not suitable for even the simplest of analysis. Textual data should be formatted into a special type of data frame known as a tibble using the `unnest_token` function. This function splits the text into single words, strips all punctuation, and converts each word to lowercase for easy comparability.
 
-### Extract and format into a tidy text tibble
+Extract and format into a tidy text tibble
 
 ```{r}
 # store the title of each novel within a variable
@@ -91,12 +91,12 @@ series %>% head(10)
 ## Step 3: Text Analysis
 
 ### Simple Analysis
-Let's begin with simple analysis and count the total number of words in each novel.
+Now that we have a tidy tibble for each chapter in each novel, let's begin with simple analysis and count the total number of words in each novel.
 
 ```{r}
 series %>%
   group_by(book) %>%
-  summarize(total_words = n())
+  summarize(total_words = n()) # adds all row observations by novel 
 ```
 
 Out of all seven novels, **Order of the Pheonix** is the longest novels with a total of 258,763 words, while **Philosopher's Stone** is the shortest with only 77,875 words.
@@ -143,12 +143,12 @@ series %>%
   ungroup() %>%
   ggplot(aes(book, total_words, fill = book)) +
     geom_bar(stat = "identity") +
-    coord_flip() +
+    coord_flip() + # Flip cartesian coordinates so horizontal becomes vertical vice versa.
     scale_y_continuous(name="Total Number of Words",
                        labels = comma,
-                       breaks = c(0, 50000, 100000, 150000, 200000, 250000, 300000)) +
-    scale_x_discrete(name = "Novels") +
-    theme(legend.position = "none")
+                       breaks = c(0, 50000, 100000, 150000, 200000, 250000, 300000)) + # manually set breaks
+    scale_x_discrete(name = "Novels") + # sets x axis
+    theme(legend.position = "none") # removes legend from plot
 ```
 
 Next, we'll plot the top 10 words used in each novel.
@@ -163,8 +163,8 @@ series %>%
     geom_bar(stat = "identity") +
     facet_wrap(~ book, scales = "free_y") + # separates plots by novel, "free_y" shares scales across the y-axis
     labs(x = "", y = "Frequency") + # set x and y-axis labels
-    coord_flip() +
-    theme(legend.position="none") # Flip cartesian coordinates so horizontal becomes vertical vice versa.
+    coord_flip() + # Flip cartesian coordinates so horizontal becomes vertical vice versa.
+    theme(legend.position="none") # removes legend from plot
 ```
 
 Finally, generating word clouds is another useful way to visualize the frequency of words by novel.
@@ -183,7 +183,11 @@ series %>%
     )) +
     geom_text_wordcloud_area(area_corr = TRUE,
         eccentricity = 2) +
-    scale_size_area(max_size = 7.5) +
+    scale_size_area(max_size = 7.5) + # scales the size of the word clouds
     theme_minimal() +
-    facet_wrap(~book)
+    facet_wrap(~book) # seperates plots by novel
 ```
+
+## Conclusion:
+
+Getting started on text mining and analysis is quick and easy! If you're interested in performing simple text analysis on other text, you can install the [gutenbergr](https://cran.r-project.org/web/packages/gutenbergr/vignettes/intro.html) package. This package provides access to a wide selection of public domain texts. Be on the look out for a future post on sentiment analysis!
